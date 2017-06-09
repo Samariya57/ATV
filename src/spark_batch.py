@@ -99,7 +99,8 @@ def transaction_between(transaction_data, db):
     return result
 
 
-
+# To submit script:
+# $SPARK_HOME/bin/spark-submit --master spark://34.225.200.18:7077 --executor-memory 6G spark_batch.py
 if __name__ == "__main__":
 
     #db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
