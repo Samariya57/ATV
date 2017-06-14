@@ -10,6 +10,7 @@ import sys
 import MySQLdb
 import json
 import gc
+#import redis
 
 from pyspark import SparkContext
 from pyspark import SparkConf
@@ -32,38 +33,37 @@ def extract_data(json_body):
 
     try:
         from_id = json_body['actor']['id']
-        from_firstname = json_body['actor']['firstname']
-        from_lastname = json_body['actor']['lastname']
+        #from_firstname = json_body['actor']['firstname']
+        #from_lastname = json_body['actor']['lastname']
         from_username = json_body['actor']['username']
         from_picture = json_body['actor']['picture']
         is_business = json_body['actor']['is_business']
 
         to_id = json_body['transactions'][0]['target']['id']
-        to_firstname = json_body['transactions'][0]['target']['firstname']
-        to_lastname = json_body['transactions'][0]['target']['lastname']
+        #to_firstname = json_body['transactions'][0]['target']['firstname']
+        #to_lastname = json_body['transactions'][0]['target']['lastname']
         to_username = json_body['transactions'][0]['target']['username']
         to_picture = json_body['transactions'][0]['target']['picture']
         is_business = is_business or json_body['transactions'][0]['target']['is_business']
 
-	payment_id = json_body['payment_id']
-	
         if is_business is True:
             return None
 
         # Transaction data
+	payment_id = json_body['payment_id']
         message = json_body['message']
         timestamp = json_body['created_time']
     except:
         return None
 
     data = {'from_id': int(from_id),
-            'from_firstname': from_firstname,
-            'from_lastname': from_lastname,
+            #'from_firstname': from_firstname,
+            #'from_lastname': from_lastname,
             'from_username': from_username,
             'from_picture': from_picture,
             'to_id': int(to_id),
-            'to_firstname': to_firstname,
-            'to_lastname': to_lastname,
+            #'to_firstname': to_firstname,
+            #'to_lastname': to_lastname,
             'to_username': to_username,
             'to_picture': to_picture,
             'message': message,
@@ -77,39 +77,57 @@ def filter_nones(transaction_data):
         return True
     return False
 
-def check_friendship(user1,user2, db):
+def check_friendship(user1,user2,db):
 
         #db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
         cur = db.cursor()
-        if (cur.execute("Select * FROM Friends_NT WHERE (ID1,ID2)=(%s, %s)", (user1,user2))>0):
+        if (cur.execute("Select * FROM Friends WHERE (ID1,ID2)=(%s, %s)", (user1,user2))>0):
                 cur.close()
                 #db.close()
                 return True
 	try:
-        	cur.execute("INSERT INTO Friends_NT VALUE (%s,%s)", (user1,user2))
+        	cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user1,user2))
+		cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user2,user1))
 		db.commit()
 		cur.close()
         except:
 		cur.close()
+	#if (set(list1).intersection(list2))
         #db.close()
 	gc.collect()
         return False
 
-
-
+def rec_user(ID1, FullName1, ID2, FullName2, db):
+	cur = db.cursor()
+	if (cur.execute("Select * FROM Users WHERE ID=%s", (ID1))<1):
+		cur.execute("INSERT INTO Users VALUE (%s,%s)", (ID1,FullName1))
+		db.commit()
+        if (cur.execute("Select * FROM Users WHERE ID=%s", (ID2))<1):
+                cur.execute("INSERT INTO Users VALUE (%s,%s)", (ID2,FullName2))
+                db.commit()
+	cur.close()
+	#gc.collect()
 
 def transaction_between(transaction_data, db):
 
     #print("transaction_between")
     user1 = transaction_data['from_id']
     user2 = transaction_data['to_id']
+    user1FN = transaction_data['from_username']
+    user2FN = transaction_data['to_username']
+   
     payment_id = transaction_data['payment_id']	
     amount = transaction_data['amount']
-    result = check_friendship(user1,user2, db)
+    time_t = transaction_data['timestamp']
+    message = transaction_data['message']
+    
+    result = check_friendship(user1,user2,db)
+    rec_user(user1,user1FN,user2,user2FN,db)
+    
     try:
 	cur=db.cursor()
-	cur.execute("INSERT INTO Transaction_NT VALUE (%s,%s,%s,%s,%s)",(payment_id, user1,user2,amount,result))
-	cur.execute("INSERT INTO Transaction_NT VALUE (%s,%s,%s,%s,%s)",(-payment_id, user2,user1,-amount,result))
+	cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
+	#cur.execute("INSERT INTO Transaction_NT VALUE (%s,%s,%s,%s,%s)",(-payment_id, user2,user1,-amount,result))
 	db.commit()	
 	cur.close()
 	db.close()
