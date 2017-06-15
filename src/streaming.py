@@ -1,16 +1,8 @@
-
-
 import threading, logging, time
 import random
-#import pickle
 import json
 import MySQLdb
-#import numpy as np
-#import redis
 from kafka import KafkaConsumer
-#from pymoji import PyMoji
-#from pybloom import ScalableBloomFilter
-#from sets import Set
 import gc
 
 
@@ -18,10 +10,11 @@ import gc
 class Streaming(threading.Thread):
     daemon = True
 
-    # Constructor sets up Redis connection and algorithm vars
+    
     def __init__(self):
         super(Streaming, self).__init__()
-
+	
+	self.db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
 
     def __filter_nones__(self,transaction_data):
     	if transaction_data is not None:
@@ -29,45 +22,41 @@ class Streaming(threading.Thread):
     	return False
         
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers='34.226.228.0:9092')
+        consumer = KafkaConsumer(bootstrap_servers='34.226.228.0:9092',group_id="gruppa")
         consumer.subscribe(['transactions'])
 
         for message in consumer:
             msg = str(message.value)
             unwraped = self.__extract_data__(msg)
 	    if self.__filter_nones__(unwraped):
-            	result = self.__transaction_between__(unwraped,MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB"))
+            	result = self.__transaction_between__(unwraped,self.db)
     def __check_friendship__(self,user1,user2,db):
 
-        #db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
         cur = db.cursor()
         if (cur.execute("Select * FROM Friends WHERE (ID1,ID2)=(%s, %s)", (user1,user2))>0):
                 cur.close()
-                #db.close()
                 return True
         try:
-                cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user1,user2))
-                cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user2,user1))
+                cur.execute("INSERT INTO Friends VALUE (%s,%s)", [(user1,user2),(user2,user1)])
+                #cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user2,user1))
                 db.commit()
                 cur.close()
         except:
                 cur.close()
-        #if (set(list1).intersection(list2))
-        #db.close()
         gc.collect()
         return False
 
 	
     def __rec_user__(self,ID1, FullName1, ID2, FullName2, db):
         cur = db.cursor()
-        if (cur.execute("Select * FROM Users WHERE ID=%s", (ID1))<1):
+        try:
                 cur.execute("INSERT INTO Users VALUE (%s,%s)", (ID1,FullName1))
                 db.commit()
-        if (cur.execute("Select * FROM Users WHERE ID=%s", (ID2))<1):
                 cur.execute("INSERT INTO Users VALUE (%s,%s)", (ID2,FullName2))
                 db.commit()
-        cur.close()
-        #gc.collect()
+	except:
+		cur.close()
+	cur.close()
 
     
     def __extract_data__(self, json_obj):
@@ -90,7 +79,7 @@ class Streaming(threading.Thread):
         	if is_business is True:
             		return None
 
-        # Transaction data
+        	# Transaction data
         	payment_id = json_body['payment_id']
         	message = json_body['message']
         	timestamp = json_body['created_time']
@@ -98,7 +87,7 @@ class Streaming(threading.Thread):
         	return None
 
 	data = {'from_id': int(from_id),
-        	    #'from_firstname': from_firstname,
+        	#'from_firstname': from_firstname,
             	#'from_lastname': from_lastname,
             	'from_username': from_username,
             	'from_picture': from_picture,
@@ -132,13 +121,12 @@ class Streaming(threading.Thread):
     	try:
         	cur=db.cursor()
         	cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
-        #cur.execute("INSERT INTO Transaction_NT VALUE (%s,%s,%s,%s,%s)",(-payment_id, user2,user1,-amount,result))
         	db.commit()
         	cur.close()
-        	db.close()
+        	#db.close()
     	except:
         	cur.close()
-        	db.close()
+        	#db.close()
     	gc.collect()
     	return True
 
@@ -155,5 +143,6 @@ if __name__ == "__main__":
             print("Started Kafka consumer.")
         else:
             print("Listening for new messages in topic: 'transactions'...")
-            time.sleep(15)
+            time.sleep(10)
+
 
