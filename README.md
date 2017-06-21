@@ -17,4 +17,10 @@ Venmo transactions from 2010 to april 2017 (1TB+) stored in S3 bucket with JSON 
 ![alt text][logo]
 
 [logo]: https://github.com/Samariya57/ATV/blob/master/pipeline.jpg "Current pipeline"
+
+* **Spark** - batch process on historical data
+* **Kafka** - real time process simulation by kafka-producer.py script and 3 different consumer types (3 topics)
+* **MySQL** - storing Users, Friends(people. who have at least one transaction) and Transactions tables
+* **Redis** - storing 3 DB, for unverified transaction _from_ and _to_ users and quantity of all and verified real time transactions 
+* **Flask** - frontend for users and analysts
 ## Where to start?
