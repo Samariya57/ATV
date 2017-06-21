@@ -22,8 +22,8 @@ class Producer(threading.Thread):
            # json_body = data.read().splitlines()
            # for json_obj in json_body:
                 	producer.send('transactions', line)
-                	time.sleep(0.25)
-                	print type(line)# + '\n' + '=================================================================' + '\n'
+                	#time.sleep(0.05)
+                	#print type(line)# + '\n' + '=================================================================' + '\n'
 
     # Access S3 bucket
     def __get_s3_bucket__(self, bucket_name):

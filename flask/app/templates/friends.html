@@ -1,0 +1,31 @@
+{% extends "mybase.html" %}
+{% block friends %}
+ {% for val in User %}
+ <h1 style="text-align:left;">Hello, {{val.Name}} </h1>
+ {% endfor %}
+<div class="container">
+     <div class="starter-template">
+       <div class="row" style="height:100vh;">
+               <div class="col-md-10 col-md-offset-1">
+                   <table class="table">
+                     <thead>
+                       <tr>
+                         <th style="text-align:center">Friend</th>
+			 <th style="text-align:center">Friend's friends</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {% for val in output %}
+                       <tr>
+                         <td><a href="/friends/{{val.FriendID}}">{{val.Friend}}</a></td>
+			 <td>{{val.Friends}}</td>
+                       </tr>
+                       {% endfor %}
+                     </tbody>
+                   </table>
+               </div>
+       </div>
+     </div>
+   </div>
+{% endblock %}
+
