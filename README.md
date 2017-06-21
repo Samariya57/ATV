@@ -14,7 +14,7 @@ Venmo transactions from 2010 to april 2017 (1TB+) stored in S3 bucket with JSON 
 * Friends (people with at least 1 transaction between them)
 * Transactions
 ## Pipeline
-![alt text][pipeline]
+![alt text][logo]
 
 [logo]: https://github.com/Samariya57/ATV/blob/master/pipeline.jpg "Current pipeline"
 ## Where to start?
