@@ -1,34 +1,21 @@
 from app import app
 import MySQLdb
 from flask import jsonify
-#from pandas import read_sql
-#from flask_table import Table, Col
-#from flask import request
 from flask import render_template, request
 import copy
 import time
 import datetime
 from  collections import Counter
 import redis
-#db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
-#cursor = db.cursor()
 
-#class ItemTable(Table):
-#	Time = Col('Time')
-#	User1 = Col('From')
-#	User2 = Col('To')
-#	Amount = Col('$')
-#	Message = Col('Message')
-#	Verified = Col('Verified')
-
-#user = 2
-
+# Open the start page for user verification
 @app.route('/')
 @app.route('/transactions/')
 @app.route('/friends/')
 def enter ():
 	return render_template("enter.html")
 
+# All user transactions, if id is known 
 @app.route('/transactions/<int:user>')
 
 def get_tran_data(user):
@@ -62,6 +49,7 @@ def get_tran_data(user):
 	return render_template("transactions.html", output = jsonresponse, User = User)
 	#return jsonify(user=User)
 
+# All users friends and their friends if id in known	
 @app.route('/friends/<int:user>')
 
 def get_friends_data(user):
@@ -99,6 +87,7 @@ def get_friends_data(user):
 		User = [{"Name": "user"}]
 	return render_template("friends.html", output = jsonresponse, User = User)
 
+# Function for culculating ATV performance
 @app.route('/statistics')
 
 def statistica():
@@ -124,11 +113,13 @@ def statistica():
 	
     return jsonify(all_t = all_t, av_t = av_t)
 
+# ATV performance
 @app.route('/vavperformance')
 
 def index():
     return render_template('system_perform.html')
 
+# Dashboards for potential fraud
 @app.route('/potential_fraud')
 
 def fraud_detection ():
@@ -150,15 +141,8 @@ def fraud_detection ():
 	from_c = Counter(from_users).most_common(20)
 	to_c = Counter(to_users).most_common(20)
 
-        db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
+        db = MySQLdb.connect(host="ec2-xx-xxx-xx-xxx.compute-1.amazonaws.com", user="user", passwd="password", db="VenmoDB")
         cursor = db.cursor()
-	#names =[]
-	#for user in from_c:
-	#      query_string = "SELECT FullName FROM Users WHERE ID={user}".format(user=user[0])
-  	#      response = cursor.execute(query_string)
-       	#      names.append(cursor.fetchall())
-
         jsonresponse_from = [{"UserName": int(user[0]),"Number":int(user[1]) } for user in from_c]
         jsonresponse_to = [{"UserName": int(user[0]),"Number":int(user[1]) } for user in to_c] 
-	#gc.collect()
 	return render_template("fraud.html", from_out = jsonresponse_from,to_out = jsonresponse_to)
