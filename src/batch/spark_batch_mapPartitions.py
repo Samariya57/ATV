@@ -49,7 +49,7 @@ def extract_data(json_body):
             'to_id': int(to_id),
             'to_username': to_username,
             'to_picture': to_picture,
-            'message': message,
+            'message': message.encode('ascii', 'ignore').decode('ascii')[0:250],
             'timestamp': timestamp,
 	    'payment_id': int(payment_id),
 	    'amount': random.randint(5,75),
@@ -97,7 +97,7 @@ def rec_user(ID1, FullName1, ID2, FullName2,db):
 
 def write_transactions (partition):
 
- db=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
+ db=MySQLdb.connect(host="ec2-.compute-1.amazonaws.com", user="", passwd="", db="VenmoDB")
  cur=db.cursor()
  for transaction_data in partition:
     
@@ -115,11 +115,13 @@ def write_transactions (partition):
     
     try:
 	cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
+    	#db.commit()
     except:
-	print ('no')
- db.commit()	
+	#db.rollback()
+	print(message)
+ db.commit()
  db.close()
- return True    
+ return partition    
 
 def processing (partition):
 
@@ -135,14 +137,12 @@ def processing (partition):
 if __name__ == "__main__":
 
 
-    sc = SparkContext(appName="Venmo")
-
-    for i in range(15,16):
-
-	read_rdd = sc.textFile("s3a://venmo-json/2016_12/venmo_2016_12_"+str(i).zfill(2)+".json")
+    	sc = SparkContext(appName="Venmo_mapPart")
+	read_rdd = sc.textFile("s3a://venmo-json/*")
 	cleaned_rdd = read_rdd.map(lambda x: extract_data(x)).filter(lambda x: filter_nones(x)) # clean json data
-        transactions_to_write = cleaned_rdd.mapPartitions(processing)
+        
+	transactions_to_write = cleaned_rdd.mapPartitions(processing)
 	written_transactions = cleaned_rdd.mapPartitions(write_transactions)
 	
-        print(transactions_to_write.count(), written_transactions)
+        print(transactions_to_write.count(), written_transactions.count())
 
