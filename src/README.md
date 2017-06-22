@@ -7,5 +7,7 @@
 * $ sudo apt-get install mysqltuner
 * $ sudo apt-get install mysql-client-core-5.5
 
+* $ sudo pip install mysql-connector-python-rf --egg SCons
+
 ## Redis
 * $ sudo pip install redis
