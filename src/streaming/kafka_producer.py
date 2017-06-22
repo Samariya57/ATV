@@ -9,7 +9,7 @@ class Producer(threading.Thread):
     daemon = True
 
     def run(self):
-        producer = KafkaProducer(bootstrap_servers='34.226.228.0:9092')
+        producer = KafkaProducer(bootstrap_servers='host:9092')
 
         bucket_name = 'venmo-json'
         bucket = self.__get_s3_bucket__(bucket_name)
