@@ -25,7 +25,7 @@ class Streaming(threading.Thread):
         
     def run(self):
         consumer = KafkaConsumer(bootstrap_servers='host:9092')
-        consumer.subscribe(['true'])
+        consumer.subscribe(['True'])
 	producer = KafkaProducer(bootstrap_servers='host:9092')
         for message in consumer:
             msg = str(message.value)
