@@ -25,7 +25,7 @@ class Streaming(threading.Thread):
         
     def run(self):
         consumer = KafkaConsumer(bootstrap_servers='host:9092')
-        consumer.subscribe(['True'])
+        consumer.subscribe(['False'])
 	producer = KafkaProducer(bootstrap_servers='host:9092')
         for message in consumer:
             msg = str(message.value)
@@ -85,7 +85,7 @@ class Streaming(threading.Thread):
         time_t = transaction_data['timestamp']
         message = transaction_data['message']
     
-        result = True
+        result = False
         try:
 		cur=db.cursor()
 		cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
