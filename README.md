@@ -28,4 +28,10 @@ Venmo transactions from 2010 to april 2017 (1TB+) stored in S3 bucket with JSON 
 * **MySQL** - storing Users, Friends(people. who have at least one transaction) and Transactions tables
 * **Redis** - storing 3 DB, for unverified transaction _from_ and _to_ users and quantity of all and verified real time transactions 
 * **Flask** - frontend for users and analysts
-## Where to start?
+## GitHub repo structure  
+
+- `./src/` contains all relevant files for replicating the batch and streaming portions of the project
+
+- `./flask/` contains the relevant files for the Flask web application
+
+- `./sample-data` contains some sample Venmo transaction data
