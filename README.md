@@ -34,4 +34,4 @@ Venmo transactions from 2010 to april 2017 (1TB+) stored in S3 bucket with JSON 
 
 - `./flask/` contains the relevant files for the Flask web application
 
-- `./sample-data` contains some sample Venmo transaction data
+- `./sample_data` contains some sample Venmo transaction data
