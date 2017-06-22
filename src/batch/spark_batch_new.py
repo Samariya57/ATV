@@ -95,8 +95,11 @@ def rec_user(ID1, FullName1, ID2, FullName2,db):
 		return True; return False
 	
 
-def transaction_between(transaction_data, db):
+def write_transactions (partition):
 
+ db=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
+ cur=db.cursor()
+ for transaction_data in partition:
     
     user1 = transaction_data['from_id']
     user2 = transaction_data['to_id']
@@ -108,25 +111,19 @@ def transaction_between(transaction_data, db):
     time_t = transaction_data['timestamp']
     message = transaction_data['message']
     
-    result = check_friendship(user1,user2,db)
-    rec_user(user1,user1FN,user2,user2FN,db)
+    result = transaction_data['AV']
     
     try:
-	cur=db.cursor()
 	cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
-	#cur.execute("INSERT INTO Transaction_NT VALUE (%s,%s,%s,%s,%s)",(-payment_id, user2,user1,-amount,result))
-	db.commit()	
-	cur.close()
-	db.close()
     except:
-	cur.close()
-	db.close()
-    gc.collect()
-    return True    
+	print ('no')
+ db.commit()	
+ db.close()
+ return True    
 
 def processing (partition):
 
-        db=MySQLdb.connect(host="ec2-.compute-1.amazonaws.com", user="", passwd="", db="VenmoDB")	
+        db=MySQLdb.connect(host="ec2-.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")	
 	for x in partition:
 		if rec_user(x['from_id'],x['from_username'],x['to_id'],x['to_username'],db):
 			check_friends(x,db)
@@ -140,10 +137,12 @@ if __name__ == "__main__":
 
     sc = SparkContext(appName="Venmo")
 
-    for i in range(1,13):
+    for i in range(15,16):
 
 	read_rdd = sc.textFile("s3a://venmo-json/2016_12/venmo_2016_12_"+str(i).zfill(2)+".json")
 	cleaned_rdd = read_rdd.map(lambda x: extract_data(x)).filter(lambda x: filter_nones(x)) # clean json data
         transactions_to_write = cleaned_rdd.mapPartitions(processing)
-        print(transactions_to_write.count())
+	written_transactions = cleaned_rdd.mapPartitions(write_transactions)
+	
+        print(transactions_to_write.count(), written_transactions)
 
