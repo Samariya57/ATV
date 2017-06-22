@@ -2,22 +2,23 @@
 
 
 {% block enter_form %}
+<br>
+<br>
+<br>
+<h1><b>A</b>utomatic <b>T</b>ransaction <b>V</b>erification</h1>
+<br>
+<br>
+<h4><i>Pay faster while detecting fraud</i></h4>
 <div style="top: 50%;left: 50%;">
 <br>
 <br>
 <br>
 <br>
 <br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<div style="width:100%">
+<div style="width:100%;font-size:3vh;">
 Enter your id:
 <input type="number" id="user_id" />
-<input type="button" id="btn" value="Enter" onClick="javascript: window.location='http://34.207.202.197:8915' + '/transactions/' + document.getElementById('user_id').value" />
+<input type="button" id="btn" value="Log in" onClick="javascript: window.location='/transactions/' + document.getElementById('user_id').value" />
 <br>
 <a href="javascript:window.location.href=window.location.href+'/potential_fraud'">Are you a Venmo analyst?</a>
 <br>

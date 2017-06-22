@@ -8,29 +8,21 @@ import datetime
 from  collections import Counter
 import redis
 
-# Open the start page for user verification
+
 @app.route('/')
 @app.route('/transactions/')
 @app.route('/friends/')
 def enter ():
 	return render_template("enter.html")
 
-# All user transactions, if id is known 
 @app.route('/transactions/<int:user>')
 
 def get_tran_data(user):
 	db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
 	cursor = db.cursor()
-	#user2 = 10
-	#request = "SELECT * FROM Transaction_NT limit %(user)d"
-	#response = cursor.execute(request,params={'user': user})
 	query_string = "SELECT * FROM Transactions WHERE ID1={user} OR ID2={user} ORDER BY Time DESC limit 20".format(user=user)
-	#query_string = "SELECT * FROM Transaction_NT LIMIT 10"
-	#return query_string 
 	response = cursor.execute(query_string)
 	response = cursor.fetchall()
-	#cursor.close()
-	#db.close()
 	response_list = []
         for val in response:
         	response_list.append(val)
@@ -44,12 +36,8 @@ def get_tran_data(user):
                 User = [{"Name": response[0][1]}]
         else:
                 User = [{"Name": "user"}]
-        #table = ItemTable(jsonrsponse)
-	#print(table.__html__())
 	return render_template("transactions.html", output = jsonresponse, User = User)
-	#return jsonify(user=User)
-
-# All users friends and their friends if id in known	
+	
 @app.route('/friends/<int:user>')
 
 def get_friends_data(user):
@@ -87,7 +75,6 @@ def get_friends_data(user):
 		User = [{"Name": "user"}]
 	return render_template("friends.html", output = jsonresponse, User = User)
 
-# Function for culculating ATV performance
 @app.route('/statistics')
 
 def statistica():
@@ -113,13 +100,11 @@ def statistica():
 	
     return jsonify(all_t = all_t, av_t = av_t)
 
-# ATV performance
-@app.route('/vavperformance')
+@app.route('/atvperformance')
 
 def index():
     return render_template('system_perform.html')
 
-# Dashboards for potential fraud
 @app.route('/potential_fraud')
 
 def fraud_detection ():
@@ -141,7 +126,7 @@ def fraud_detection ():
 	from_c = Counter(from_users).most_common(20)
 	to_c = Counter(to_users).most_common(20)
 
-        db = MySQLdb.connect(host="ec2-xx-xxx-xx-xxx.compute-1.amazonaws.com", user="user", passwd="password", db="VenmoDB")
+        db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
         cursor = db.cursor()
         jsonresponse_from = [{"UserName": int(user[0]),"Number":int(user[1]) } for user in from_c]
         jsonresponse_to = [{"UserName": int(user[0]),"Number":int(user[1]) } for user in to_c] 

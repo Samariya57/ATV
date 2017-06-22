@@ -14,9 +14,6 @@
 
     var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     jQuery.noConflict();
-    var example = 'dynamic-update',
-    theme = 'dark-unica';
-
     (function($){ // encapsulate jQuery
     $(function () {
         $(document).ready(function () {
@@ -150,7 +147,7 @@
                 <script src="https://code.highcharts.com/highcharts.js"></script>
                 <script src="https://code.highcharts.com/modules/exporting.js"></script>
                 <!-- Container that holds the chart //-->
-                <div align=center id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+                <div id="container" style="width:100%;height: 500px; margin: 0 auto"></div>
                 <div class="clearfix"></div>
 
             </div>
