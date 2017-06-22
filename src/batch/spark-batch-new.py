@@ -9,7 +9,6 @@ import sys
 
 import MySQLdb
 import json
-import gc
 from pyspark import SparkContext
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
@@ -17,12 +16,11 @@ from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 from botocore.exceptions import ClientError
 import random
-from itertools import repeat
-def extract_data(json_body):
 
+# JSON->dictionary
+def extract_data(json_body):
     
     json_body = json.loads(json_body)
-
 
     try:
         from_id = json_body['actor']['id']
@@ -64,47 +62,35 @@ def filter_nones(transaction_data):
     return False
 
 def check_friends (transaction_data,db):
-	#db=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
+
 	user1 = transaction_data['from_id']
 	user2 = transaction_data['to_id']
         cur = db.cursor()
         if (cur.execute("Select * FROM Friends WHERE (ID1,ID2)=(%s, %s)", (user1,user2))>0):
-                #cur.fetchall()
-                #db.close()
-		#gc.collect()
                 transaction_data['AV']=True
 	else:
 		try:
         		cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user1,user2))
 			db.commit()
 			cur.execute("INSERT INTO Friends VALUE (%s,%s)", (user2,user1))
-			#cur.fetchall()
 			db.commit()
-			#cur.close()
         	except:
 			db.rollback()
 	cur.close()
-	#db.close()        
-	#gc.collect()
         return transaction_data
 
 def rec_user(ID1, FullName1, ID2, FullName2,db):
-	#db=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
 	cur = db.cursor()
 	i=0
 	if (cur.execute("Select * FROM Users WHERE ID=%s", (ID1))<1):
-		#cur.fetchall()
 		cur.execute("INSERT INTO Users VALUE (%s,%s)", (ID1,FullName1))
 		i = i+1
 		db.commit()
         if (cur.execute("Select * FROM Users WHERE ID=%s", (ID2))<1):
-		#cur.fetchall()
                 cur.execute("INSERT INTO Users VALUE (%s,%s)", (ID2,FullName2))
 		i = i+1
                 db.commit()
 	cur.close()
-	#db.close()
-	#gc.collect()
 	if i<1:
 		return True; return False
 	
@@ -139,8 +125,8 @@ def transaction_between(transaction_data, db):
     return True    
 
 def processing (partition):
-	#db1=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
-        db=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")	
+
+        db=MySQLdb.connect(host="ec2-.compute-1.amazonaws.com", user="", passwd="", db="VenmoDB")	
 	for x in partition:
 		if rec_user(x['from_id'],x['from_username'],x['to_id'],x['to_username'],db):
 			check_friends(x,db)
@@ -151,22 +137,13 @@ def processing (partition):
 # $SPARK_HOME/bin/spark-submit --master spark://34.225.200.18:7077 --executor-memory 6G spark_batch.py
 if __name__ == "__main__":
 
-    #list_rez=[]
-    sc = SparkContext(appName="Venmo")
-    
-    #db2=MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")
-    for i in range(12,13):
 
-        #read_rdd = sc.textFile("s3a://venmo-json/2016_"+str(i).zfill(2)+"/*")
+    sc = SparkContext(appName="Venmo")
+
+    for i in range(1,13):
+
 	read_rdd = sc.textFile("s3a://venmo-json/2016_12/venmo_2016_12_"+str(i).zfill(2)+".json")
 	cleaned_rdd = read_rdd.map(lambda x: extract_data(x)).filter(lambda x: filter_nones(x)) # clean json data
-    
-	print(cleaned_rdd.count())
         transactions_to_write = cleaned_rdd.mapPartitions(processing)
         print(transactions_to_write.count())
-	print(cleaned_rdd.count())
-	#gc.collect()
-    #db1.close()
-    #db2.close()
-    #print(sum(list_rez))
 
