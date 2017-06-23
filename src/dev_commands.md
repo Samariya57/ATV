@@ -1,7 +1,3 @@
-## Copy from remote machine:
-
-scp ubuntu@34.225.71.255:/home/ubuntu/streaming.py /home/samariya57/
-
 ## Start your batch spark script:
 
 spark-submit --master spark://34.224.161.59:7077 --executor-memory 6G spark-batch.pysc
