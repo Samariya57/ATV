@@ -1,0 +1,38 @@
+{% extends "mybase.html" %}
+{% block transactions %}
+ {% for val in User %}
+ <h1 style="text-align:left;">Hello, {{val.Name}} </h1>
+ {% endfor %}
+<div class="container">
+     <div class="starter-template">
+       <div class="row" style="height:100vh;">
+               <div class="col-md-10 col-md-offset-1">
+                   <table class="table">
+                     <thead>
+                       <tr>
+                         <th>From</th>
+                         <th>To</th>
+                         <th>Time</th>
+                         <th>Amount</th>
+                         <th>Message</th>
+			             <th>Verified</th>
+                       </tr>
+                     </thead>
+                     <tbody>
+                       {% for val in output %}
+                       <tr>
+                         <td>{{val.From}}</td>
+                         <td>{{val.To}}</td>
+                         <td>{{val.Time}}</td>
+                         <td>{{val.Amount}}</td>
+                         <td>{{val.Message}}</td>
+			             <td>{{val.Verified}}</td>
+                       </tr>
+                       {% endfor %}
+                     </tbody>
+                   </table>
+               </div>
+       </div>
+     </div>
+   </div>
+{% endblock %}

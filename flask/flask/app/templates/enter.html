@@ -1,0 +1,54 @@
+{% extends "mybase.html" %}
+
+
+{% block enter_form %}
+<br>
+<br>
+<br>
+<h1><b>A</b>utomatic <b>T</b>ransaction <b>V</b>erification</h1>
+<br>
+<br>
+<h4><i>Pay faster while detecting fraud</i></h4>
+<div style="top: 50%;left: 50%;">
+<br>
+<br>
+<br>
+<br>
+<br>
+<div style="width:100%;font-size:3vh;">
+Enter your id:
+<input type="number" id="user_id" />
+<input type="button" id="btn" value="Log in" onClick="javascript: window.location='/transactions/' + document.getElementById('user_id').value" />
+<br>
+<a href="javascript:window.location.href='/potential_fraud'">Are you a Venmo analyst?</a>
+<br>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+</div>
+{% endblock %}
+{% block enter_form2 %}
+<form id="myForm" action="/action_page.php">
+  Enter your user id:<br> 
+  <input type="number" id="user_id" name="userid"><br><br>
+  <input type="button" onclick="enterFunction()" value="Log in">
+</form>
+{% endblock %} 
+
+{% block enter_script %}
+<script>
+function enterFunction() {
+
+    val id = document.getElementById("user_id").value;
+    window.location = window.location.host + "/transactions/"+id;
+}
+</script>
+{% endblock %}
+
