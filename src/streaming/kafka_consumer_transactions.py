@@ -13,7 +13,6 @@ from kafka import KafkaProducer
 
 class Streaming(threading.Thread):
     daemon = True
-
     
     def __init__(self):
         super(Streaming, self).__init__()
@@ -25,7 +24,7 @@ class Streaming(threading.Thread):
     
     def __filter_nones__(self,transaction_data):
     	if transaction_data is not None:
-        	return True
+            return True
     	return False
         
     def run(self):
@@ -44,36 +43,35 @@ class Streaming(threading.Thread):
 
         cur = db.cursor()
         if (cur.execute("Select * FROM Friends WHERE (ID1,ID2)=(%s, %s)", (user1,user2))>0):
-                cur.close()
-                return True
+            cur.close()
+            return True
 	else:
-		friend1 = cur.execute("Select ID2 FROM Friends Where (ID1)=(%s)",(user1))
-                if friend1<1:
-                        return False
-		friend1 = cur.fetchall()
-                friend2 = cur.execute("Select ID2 FROM Friends Where (ID1)=(%s)",(user2))
-                if friend2<1:
-                        return False                
+	    friend1 = cur.execute("Select ID2 FROM Friends Where (ID1)=(%s)",(user1))
+            if friend1<1:
+                return False
+	    friend1 = cur.fetchall()
+            friend2 = cur.execute("Select ID2 FROM Friends Where (ID1)=(%s)",(user2))
+            if friend2<1:
+                return False                
 		friend2 = cur.fetchall()	
 		if (len (set(friend1).intersection(friend2))>0):
-			cur.close()
-			gc.collect()
-			return True
+		    cur.close()
+		    gc.collect()
+		    return True
 		else:
-			row = [item[0] for item in friend1] + [0]
-			friend11 = cur.execute("Select ID2 FROM Friends Where ID1 in %s",[row])
-			friend11 = cur.fetchall()
-			if (len(set(friend11).intersection(friend2))>0):
-				cur.close()
-				return True
+		    row = [item[0] for item in friend1] + [0]
+		    friend11 = cur.execute("Select ID2 FROM Friends Where ID1 in %s",[row])
+		    friend11 = cur.fetchall()
+		    if (len(set(friend11).intersection(friend2))>0):
+			cur.close()
+			    return True
 			else:
-	                        row = [item[0] for item in friend2] + [0]
-        	                friend21 = cur.execute("Select ID2 FROM Friends Where ID1 in %s",[row])
-                	        friend21 = cur.fetchall()
-                       		if (len(set(friend21).intersection(friend1))>0):
-                               		cur.close()
-                                	return True
-
+	                    row = [item[0] for item in friend2] + [0]
+        	            friend21 = cur.execute("Select ID2 FROM Friends Where ID1 in %s",[row])
+                	    friend21 = cur.fetchall()
+                            if (len(set(friend21).intersection(friend1))>0):
+                                cur.close()
+                                return True
         gc.collect()
         return False
 	
@@ -81,24 +79,21 @@ class Streaming(threading.Thread):
     def __extract_data__(self, json_obj):
         json_body = json.loads(json_obj)
     	try:
-        	from_id = json_body['actor']['id']
-       		is_business = json_body['actor']['is_business']
+            from_id = json_body['actor']['id']
+       	    is_business = json_body['actor']['is_business']
 
-        	to_id = json_body['transactions'][0]['target']['id']
-        	is_business = is_business or json_body['transactions'][0]['target']['is_business']
-
-        	if is_business is True:
-            		return None
+            to_id = json_body['transactions'][0]['target']['id']
+            is_business = is_business or json_body['transactions'][0]['target']['is_business']
+            if is_business is True:
+            	return None
     	except:
-        	return None
+            return None
 
 	data = {'from_id': int(from_id),
             	'to_id': int(to_id)}
     	return data
 
     def __transaction_process__(self,transaction_data, db, rediska, rediska1, rediska2):
-
-    
     	user1 = transaction_data['from_id']
     	user2 = transaction_data['to_id']
     	
@@ -107,9 +102,9 @@ class Streaming(threading.Thread):
 	ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')	
 	rediska.lpush(ts, result)
 	if not result:
-		ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')
-		rediska1.lpush(ts,user1)
-		rediska2.lpush(ts,user2)
+	    ts = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M')
+	    rediska1.lpush(ts,user1)
+	    rediska2.lpush(ts,user2)
     	gc.collect()
     	return result
 
