@@ -15,16 +15,9 @@ class Producer(threading.Thread):
         bucket = self.__get_s3_bucket__(bucket_name)
         # Send data from S3 to Kafka queue
 	for i in range(1,28):
-		for line in  smart_open.smart_open("s3://venmo-json/2017_01/venmo_2017_01_"+str(i).zfill(2)+".json"):
-        #for obj in bucket.objects.filter(Prefix='2017_*'):
-	   # print("m")
-           # data = obj.get()['Body']  
-           # json_body = data.read().splitlines()
-           # for json_obj in json_body:
-                	producer.send('transactions', line)
-                	#time.sleep(0.05)
-                	#print type(line)# + '\n' + '=================================================================' + '\n'
-
+	    for line in  smart_open.smart_open("s3://venmo-json/2017_01/venmo_2017_01_"+str(i).zfill(2)+".json"):
+                producer.send('transactions', line)
+                
     # Access S3 bucket
     def __get_s3_bucket__(self, bucket_name):
         s3 = boto3.resource('s3')
