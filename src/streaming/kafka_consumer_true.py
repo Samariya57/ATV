@@ -1,3 +1,5 @@
+# This script write transaction to DB after getting a flag True
+
 import threading, logging, time
 import random
 import json
