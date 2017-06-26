@@ -38,7 +38,7 @@
                     }
                 },
                 title: {
-                    text: 'Transactions statistics'
+                    text: 'Transaction statistics'
                 },
                 xAxis: {
                     type: 'datetime',
@@ -119,12 +119,12 @@
           // Restart timer to keep updating periodically.
           timer = setTimeout(submit_form, 1000);
         };
-        $('a#calculate').bind('click', submit_form);
-        $('input[type=text]').bind('keydown', function(e) {
-          if (e.keyCode == 13) {
-            submit_form();
-          }
-        });
+        //$('a#calculate').bind('click', submit_form);
+       // $('input[type=text]').bind('keydown', function(e) {
+         // if (e.keyCode == 13) {
+         //   submit_form();
+         // }
+       // });
         // Initial start of time, make it wait for 1 second to allow highcharts to load
         setTimeout(submit_form, 1000);
       });
@@ -142,6 +142,7 @@
 {% endblock %}
        
 {% block chart %}
+	
   	<div class="container" style="align:center; width:100%">
             <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 sidebar-eq demo">
                 <script src="https://code.highcharts.com/highcharts.js"></script>

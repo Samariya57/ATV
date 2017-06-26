@@ -11,7 +11,7 @@ import redis
 
 @app.route('/')
 @app.route('/transactions/')
-@app.route('/friends/')
+@app.route('/connections/')
 def enter ():
 	return render_template("enter.html")
 
@@ -38,7 +38,7 @@ def get_tran_data(user):
                 User = [{"Name": "user"}]
 	return render_template("transactions.html", output = jsonresponse, User = User)
 	
-@app.route('/friends/<int:user>')
+@app.route('/connections/<int:user>')
 
 def get_friends_data(user):
 	db = MySQLdb.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", passwd="pass", db="VenmoDB")

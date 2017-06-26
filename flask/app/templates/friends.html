@@ -10,14 +10,14 @@
                    <table class="table">
                      <thead>
                        <tr>
-                         <th style="text-align:center">Friend</th>
-			 <th style="text-align:center">Friend's friends</th>
+                         <th style="text-align:center">Connection</th>
+			 <th style="text-align:center">Connection's connections</th>
                        </tr>
                      </thead>
                      <tbody>
                        {% for val in output %}
                        <tr>
-                         <td><a href="/friends/{{val.FriendID}}">{{val.Friend}}</a></td>
+                         <td><a href="/connections/{{val.FriendID}}">{{val.Friend}}</a></td>
 			 <td>{{val.Friends}}</td>
                        </tr>
                        {% endfor %}
