@@ -92,7 +92,7 @@ def rec_user(ID1, FullName1, ID2, FullName2,db):
 
 def write_transactions (partition):
 
- db=sqlcon.connect(host="ec2-54-158-19-194.compute-1.amazonaws.com", user="venmo", password="pass", database="VenmoDB")
+ db=sqlcon.connect(host=".compute-1.amazonaws.com", user="", password="", database="VenmoDB")
  cur=db.cursor()
  transactions = []
  results = []
@@ -121,8 +121,8 @@ def write_transactions (partition):
 
 def getting_flag (partition):
 	
-	db = sqlcon.connect(user='venmo', password='pass',
-                                     host='ec2-54-158-19-194.compute-1.amazonaws.com',
+	db = sqlcon.connect(user='', password='',
+                                     host='.compute-1.amazonaws.com',
                                      database='VenmoDB')
 	users_list = []
 	for x in partition:
