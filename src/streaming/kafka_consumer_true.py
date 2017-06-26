@@ -1,28 +1,26 @@
 # This script write transaction to DB after getting a flag True
 
+from kafka import KafkaConsumer
+from kafka import KafkaProducer
 import threading, logging, time
 import random
 import json
 import MySQLdb
-from kafka import KafkaConsumer
 import gc
-import redis
 import time
 import datetime
-from kafka import KafkaProducer
+
 
 class Streaming(threading.Thread):
     daemon = True
-
     
     def __init__(self):
         super(Streaming, self).__init__()
-	
 	self.db = MySQLdb.connect(host="ec2-.compute-1.amazonaws.com", user="", passwd="", db="VenmoDB")
 
     def __filter_nones__(self,transaction_data):
     	if transaction_data is not None:
-        	return True
+            return True
     	return False
         
     def run(self):
@@ -34,33 +32,31 @@ class Streaming(threading.Thread):
             unwraped = self.__extract_data__(msg)
 	    if self.__filter_nones__(unwraped):
             	result = self.__write_transaction__(unwraped,self.db)
-    
-        gc.collect()
         return False
 	
     
     def __extract_data__(self, json_obj):
         json_body = json.loads(json_obj)
     	try:
-        	from_id = json_body['actor']['id']
-                from_username = json_body['actor']['username']
-        	from_picture = json_body['actor']['picture']
-       		is_business = json_body['actor']['is_business']
+            from_id = json_body['actor']['id']
+            from_username = json_body['actor']['username']
+            from_picture = json_body['actor']['picture']
+       	    is_business = json_body['actor']['is_business']
 
-        	to_id = json_body['transactions'][0]['target']['id']
-               	to_username = json_body['transactions'][0]['target']['username']
-        	to_picture = json_body['transactions'][0]['target']['picture']
-        	is_business = is_business or json_body['transactions'][0]['target']['is_business']
+            to_id = json_body['transactions'][0]['target']['id']
+            to_username = json_body['transactions'][0]['target']['username']
+            to_picture = json_body['transactions'][0]['target']['picture']
+            is_business = is_business or json_body['transactions'][0]['target']['is_business']
 
-        	if is_business is True:
-            		return None
+            if is_business is True:
+            	return None
 
-        	# Transaction data
-        	payment_id = json_body['payment_id']
-        	message = json_body['message']
-        	timestamp = json_body['created_time']
+            # Transaction data
+            payment_id = json_body['payment_id']
+            message = json_body['message']
+            timestamp = json_body['created_time']
     	except:
-        	return None
+            return None
 
 	data = {'from_id': int(from_id),
             	'from_username': from_username,
@@ -75,8 +71,6 @@ class Streaming(threading.Thread):
     	return data
 
     def __write_transaction__(self,transaction_data, db):
-
-    
     	user1 = transaction_data['from_id']
     	user2 = transaction_data['to_id']
         user1FN = transaction_data['from_username']
@@ -89,15 +83,15 @@ class Streaming(threading.Thread):
     
         result = True
         try:
-		cur=db.cursor()
-		cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
-		db.commit()
-		cur.close()
-		return True	
+	    cur=db.cursor()
+	    cur.execute("INSERT INTO Transactions VALUE (%s,%s,%s,%s,%s,%s,%s,%s,%s)",(payment_id, user1,user1FN,user2,user2FN,time_t, message,amount,result))
+	    db.commit()
+	    cur.close()
+	    return True	
     	except:
-		db.rollback()
-		cur.close()    
-	        return False 
+	    db.rollback()
+	    cur.close()    
+	    return False 
 
 
 if __name__ == "__main__":
